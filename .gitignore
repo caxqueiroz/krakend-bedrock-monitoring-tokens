@@ -1,0 +1,17 @@
+# IDE
+.idea/
+.vscode/
+
+# Build artifacts
+*.so
+bin/
+dist/
+
+# Go
+*.test
+*.out
+coverage.txt
+vendor/
+
+# OS
+.DS_Store
