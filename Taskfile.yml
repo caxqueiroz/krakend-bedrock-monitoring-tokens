@@ -3,12 +3,15 @@ version: "3"
 vars:
   PLUGIN_NAME: bedrock-usage.so
   BUILD_DIR: ./bin
+  KRAKEND_VERSION: "2.13.4"
+  KRAKEND_CONFIG: ./examples/krakend.json
+  KRAKEND_PORT: "8080"
 
 tasks:
   default:
     desc: List available tasks
     cmds:
-      - task --list
+      - task --listwhat
     silent: true
 
   build:
@@ -76,3 +79,36 @@ tasks:
     desc: Remove build artifacts
     cmds:
       - rm -rf {{.BUILD_DIR}} coverage.out
+
+  docker:build:
+    desc: Build the plugin inside the krakend-builder image (CE-compatible .so)
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - >
+        docker run --rm
+        -v "$PWD:/src"
+        -w /src
+        -e CGO_ENABLED=1
+        devopsfaith/krakend-builder:{{.KRAKEND_VERSION}}
+        go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
+
+  docker:run:
+    desc: Run KrakenD CE with the plugin and example config mounted
+    deps: [docker:build]
+    cmds:
+      - >
+        docker run --rm
+        -p {{.KRAKEND_PORT}}:8080
+        -v "$PWD/{{.BUILD_DIR}}:/opt/krakend/plugins"
+        -v "$PWD/{{.KRAKEND_CONFIG}}:/etc/krakend/krakend.json:ro"
+        devopsfaith/krakend:{{.KRAKEND_VERSION}}
+        run -c /etc/krakend/krakend.json
+
+  docker:check:
+    desc: Validate the KrakenD config inside the CE image
+    cmds:
+      - >
+        docker run --rm
+        -v "$PWD/{{.KRAKEND_CONFIG}}:/etc/krakend/krakend.json:ro"
+        devopsfaith/krakend:{{.KRAKEND_VERSION}}
+        check -c /etc/krakend/krakend.json -d
