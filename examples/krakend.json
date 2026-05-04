@@ -1,0 +1,69 @@
+{
+  "version": 3,
+  "plugin": {
+    "pattern": ".so",
+    "folder": "/opt/krakend/plugins"
+  },
+  "extra_config": {
+    "plugin/http-server": {
+      "name": ["bedrock-usage"],
+      "bedrock-usage": {
+        "key_headers": ["x-api-key", "Authorization"],
+        "reporter": "cloudwatch",
+        "log_to_stdout": true,
+        "cloudwatch": {
+          "namespace": "BedrockUsage",
+          "dimensions": ["UserKeyHash", "Model"]
+        },
+        "parse_failures_metric": "BedrockUsageParseFailures",
+        "max_body_bytes": 1048576
+      }
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/bedrock/model/{model}/invoke",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
+          "url_pattern": "/model/{model}/invoke",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "endpoint": "/bedrock/model/{model}/invoke-with-response-stream",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
+          "url_pattern": "/model/{model}/invoke-with-response-stream",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "endpoint": "/bedrock/model/{model}/converse",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
+          "url_pattern": "/model/{model}/converse",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "endpoint": "/bedrock/model/{model}/converse-stream",
+      "method": "POST",
+      "backend": [
+        {
+          "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
+          "url_pattern": "/model/{model}/converse-stream",
+          "method": "POST"
+        }
+      ]
+    }
+  ]
+}
