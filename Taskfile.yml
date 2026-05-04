@@ -89,7 +89,7 @@ tasks:
         -v "$PWD:/src"
         -w /src
         -e CGO_ENABLED=1
-        devopsfaith/krakend-builder:{{.KRAKEND_VERSION}}
+        krakend/builder:{{.KRAKEND_VERSION}}
         go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
 
   docker:run:
@@ -101,7 +101,7 @@ tasks:
         -p {{.KRAKEND_PORT}}:8080
         -v "$PWD/{{.BUILD_DIR}}:/opt/krakend/plugins"
         -v "$PWD/{{.KRAKEND_CONFIG}}:/etc/krakend/krakend.json:ro"
-        devopsfaith/krakend:{{.KRAKEND_VERSION}}
+        krakend:{{.KRAKEND_VERSION}}
         run -c /etc/krakend/krakend.json
 
   docker:check:
@@ -110,5 +110,17 @@ tasks:
       - >
         docker run --rm
         -v "$PWD/{{.KRAKEND_CONFIG}}:/etc/krakend/krakend.json:ro"
-        devopsfaith/krakend:{{.KRAKEND_VERSION}}
+        krakend:{{.KRAKEND_VERSION}}
         check -c /etc/krakend/krakend.json -d
+
+  docker:watch:
+    desc: Run KrakenD CE in watch mode (auto-reloads krakend.json on change)
+    deps: [docker:build]
+    cmds:
+      - >
+        docker run --rm
+        -p {{.KRAKEND_PORT}}:8080
+        -v "$PWD/{{.BUILD_DIR}}:/opt/krakend/plugins"
+        -v "$PWD/examples:/etc/krakend"
+        krakend:{{.KRAKEND_VERSION}}-watch
+        run -c /etc/krakend/krakend.json
