@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -90,6 +91,7 @@ func decodePayloadUsage(payload []byte) (usage.TokenUsage, error) {
 }
 
 func decodeInvokeStreamUsage(payload []byte) (usage.TokenUsage, bool, error) {
+	payload = unwrapBedrockChunkBytes(payload)
 	var value any
 	if err := json.Unmarshal(payload, &value); err != nil {
 		return usage.TokenUsage{}, false, fmt.Errorf("%w: %v", usage.ErrMalformedJSON, err)
@@ -130,4 +132,21 @@ func decodeInvokeStreamUsage(payload []byte) (usage.TokenUsage, bool, error) {
 	}
 
 	return usage.TokenUsage{}, false, nil
+}
+
+// Real Bedrock InvokeModelWithResponseStream wraps each chunk's model JSON as
+// {"bytes":"<base64>"}. Decode that envelope when present so downstream parsing
+// runs against the model's native JSON; otherwise pass payload through untouched.
+func unwrapBedrockChunkBytes(payload []byte) []byte {
+	var envelope struct {
+		Bytes string `json:"bytes"`
+	}
+	if err := json.Unmarshal(payload, &envelope); err != nil || envelope.Bytes == "" {
+		return payload
+	}
+	decoded, err := base64.StdEncoding.DecodeString(envelope.Bytes)
+	if err != nil {
+		return payload
+	}
+	return decoded
 }

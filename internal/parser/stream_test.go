@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/base64"
 	"errors"
 	"testing"
 
@@ -42,6 +43,14 @@ func TestStreamParserExtractsUsage(t *testing.T) {
 				BuildEventStreamFrameForTest(t, map[string]string{":event-type": "chunk"}, []byte(`{"amazon-bedrock-invocationMetrics":{"inputTokenCount":21,"outputTokenCount":22}}`)),
 			},
 			want: usage.TokenUsage{InputTokens: 21, OutputTokens: 22, TotalTokens: 43},
+		},
+		{
+			name:    "bedrock chunk bytes envelope",
+			surface: bedrockpath.InvokeModelWithResponseStream,
+			frames: [][]byte{
+				BuildEventStreamFrameForTest(t, map[string]string{":event-type": "chunk"}, []byte(`{"bytes":"`+base64.StdEncoding.EncodeToString([]byte(`{"amazon-bedrock-invocationMetrics":{"inputTokenCount":7,"outputTokenCount":3}}`))+`"}`)),
+			},
+			want: usage.TokenUsage{InputTokens: 7, OutputTokens: 3, TotalTokens: 10},
 		},
 	}
 
