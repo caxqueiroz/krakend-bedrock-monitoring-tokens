@@ -15,3 +15,8 @@ vendor/
 
 # OS
 .DS_Store
+
+# Secrets / local dev state (NEVER commit license keys)
+.local/
+LICENSE.crt
+krakend-ee-license*

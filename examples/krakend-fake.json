@@ -1,0 +1,77 @@
+{
+  "version": 3,
+  "plugin": {
+    "pattern": ".so",
+    "folder": "/opt/krakend/plugins"
+  },
+  "extra_config": {
+    "plugin/http-server": {
+      "name": ["bedrock-usage"],
+      "bedrock-usage": {
+        "key_headers": ["x-api-key", "Authorization"],
+        "reporter": "stdout",
+        "log_to_stdout": true,
+        "parse_failures_metric": "BedrockUsageParseFailures",
+        "max_body_bytes": 1048576
+      }
+    }
+  },
+  "endpoints": [
+    {
+      "endpoint": "/bedrock/model/{model}/invoke",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "input_headers": ["x-api-key", "Authorization", "Content-Type"],
+      "backend": [
+        {
+          "host": ["http://host.docker.internal:9000"],
+          "url_pattern": "/model/{model}/invoke",
+          "method": "POST",
+          "encoding": "no-op"
+        }
+      ]
+    },
+    {
+      "endpoint": "/bedrock/model/{model}/invoke-with-response-stream",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "input_headers": ["x-api-key", "Authorization", "Content-Type"],
+      "backend": [
+        {
+          "host": ["http://host.docker.internal:9000"],
+          "url_pattern": "/model/{model}/invoke-with-response-stream",
+          "method": "POST",
+          "encoding": "no-op"
+        }
+      ]
+    },
+    {
+      "endpoint": "/bedrock/model/{model}/converse",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "input_headers": ["x-api-key", "Authorization", "Content-Type"],
+      "backend": [
+        {
+          "host": ["http://host.docker.internal:9000"],
+          "url_pattern": "/model/{model}/converse",
+          "method": "POST",
+          "encoding": "no-op"
+        }
+      ]
+    },
+    {
+      "endpoint": "/bedrock/model/{model}/converse-stream",
+      "method": "POST",
+      "output_encoding": "no-op",
+      "input_headers": ["x-api-key", "Authorization", "Content-Type"],
+      "backend": [
+        {
+          "host": ["http://host.docker.internal:9000"],
+          "url_pattern": "/model/{model}/converse-stream",
+          "method": "POST",
+          "encoding": "no-op"
+        }
+      ]
+    }
+  ]
+}

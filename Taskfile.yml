@@ -138,3 +138,77 @@ tasks:
         -v "$PWD/examples:/etc/krakend"
         krakend:{{.KRAKEND_VERSION}}-watch
         run -c /etc/krakend/krakend.json
+
+  docker:image:fedora-ee:
+    desc: Build a Fedora image bundling Go 1.25.9 and KrakenD EE 2.13.2 (glibc dev environment)
+    cmds:
+      - >
+        docker build --platform=linux/amd64
+        -f docker/fedora-ee.Dockerfile
+        -t krakend-bedrock-dev:fedora-ee
+        .
+
+  docker:fedora-ee:build:
+    desc: Build the plugin inside the Fedora image (matches RHEL/glibc target)
+    deps: [docker:image:fedora-ee]
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - >
+        docker run --rm --platform=linux/amd64
+        -v "$PWD:/src"
+        -w /src
+        krakend-bedrock-dev:fedora-ee
+        go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
+
+  docker:fedora-ee:shell:
+    desc: Drop into a shell inside the Fedora dev image with the repo mounted
+    deps: [docker:image:fedora-ee]
+    cmds:
+      - >
+        docker run --rm -it --platform=linux/amd64
+        -v "$PWD:/src"
+        -w /src
+        krakend-bedrock-dev:fedora-ee
+        bash
+
+  docker:fedora-ee:run:
+    desc: Run KrakenD EE inside the Fedora image with the plugin, example config, and .local/LICENSE mounted
+    deps: [docker:fedora-ee:build]
+    preconditions:
+      - sh: test -s .local/LICENSE
+        msg: "Missing .local/LICENSE — place a valid KrakenD EE license at .local/LICENSE before running this task."
+    cmds:
+      - >
+        docker run --rm --platform=linux/amd64
+        -p {{.KRAKEND_PORT}}:8080
+        -v "$PWD/.local:/work"
+        -v "$PWD/{{.BUILD_DIR}}:/opt/krakend/plugins:ro"
+        -v "$PWD/{{.KRAKEND_CONFIG}}:/etc/krakend/krakend.json:ro"
+        -w /work
+        krakend-bedrock-dev:fedora-ee
+        krakend run -d -c /etc/krakend/krakend.json
+
+  fake:run:
+    desc: Run the fake Bedrock backend on :9000 (serves canned responses with non-zero usage)
+    cmds:
+      - go run ./examples/fake-bedrock
+
+  docker:fedora-ee:run:fake:
+    desc: Run KrakenD EE in Fedora container pointing at the local fake-bedrock backend
+    deps: [docker:fedora-ee:build]
+    preconditions:
+      - sh: test -s .local/LICENSE
+        msg: "Missing .local/LICENSE — place a valid KrakenD EE license at .local/LICENSE before running this task."
+      - sh: 'curl -s -o /dev/null -w "%{http_code}" http://localhost:9000/ 2>/dev/null | grep -qE "^(2|4|5)"'
+        msg: "fake-bedrock not reachable on :9000 — run `task fake:run` in another terminal first."
+    cmds:
+      - >
+        docker run --rm --platform=linux/amd64
+        --add-host=host.docker.internal:host-gateway
+        -p {{.KRAKEND_PORT}}:8080
+        -v "$PWD/.local:/work"
+        -v "$PWD/{{.BUILD_DIR}}:/opt/krakend/plugins:ro"
+        -v "$PWD/examples/krakend-fake.json:/etc/krakend/krakend.json:ro"
+        -w /work
+        krakend-bedrock-dev:fedora-ee
+        krakend run -d -c /etc/krakend/krakend.json
