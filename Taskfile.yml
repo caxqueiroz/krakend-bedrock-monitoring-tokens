@@ -5,6 +5,7 @@ vars:
   BUILD_DIR: ./bin
   KRAKEND_VERSION: "2.13.4"
   KRAKEND_EE_VERSION: "2.13.2"
+  KRAKEND_EE_BUILDER_VARIANT: "-linux-generic"
   KRAKEND_CONFIG: ./examples/krakend.json
   KRAKEND_PORT: "8080"
 
@@ -94,7 +95,7 @@ tasks:
         go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
 
   docker:build:ee:
-    desc: Build the plugin inside the krakend-builder-ee image (EE-compatible .so; requires EE license / authenticated pull)
+    desc: Build the plugin inside the krakend-builder-ee image (EE-compatible .so; defaults to glibc/-linux-generic; requires EE license / authenticated pull)
     cmds:
       - mkdir -p {{.BUILD_DIR}}
       - >
@@ -102,7 +103,7 @@ tasks:
         -v "$PWD:/src"
         -w /src
         -e CGO_ENABLED=1
-        krakend/builder-ee:{{.KRAKEND_EE_VERSION}}
+        krakend/builder-ee:{{.KRAKEND_EE_VERSION}}{{.KRAKEND_EE_BUILDER_VARIANT}}
         go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
 
   docker:run:
