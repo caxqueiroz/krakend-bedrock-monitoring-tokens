@@ -94,6 +94,18 @@ tasks:
         krakend/builder:{{.KRAKEND_VERSION}}
         go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
 
+  docker:build:generic:
+    desc: Build the plugin inside krakend/builder:{{.KRAKEND_VERSION}}-linux-generic (CE glibc/Debian builder; matches the generic-linux tarball)
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - >
+        docker run --rm --platform=linux/amd64
+        -v "$PWD:/src"
+        -w /src
+        -e CGO_ENABLED=1
+        krakend/builder:{{.KRAKEND_VERSION}}-linux-generic
+        go build -buildmode=plugin -o {{.BUILD_DIR}}/{{.PLUGIN_NAME}} .
+
   docker:build:ee:
     desc: Build the plugin inside the krakend-builder-ee image (EE-compatible .so; defaults to glibc/-linux-generic; requires EE license / authenticated pull)
     cmds:
