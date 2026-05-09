@@ -45,7 +45,7 @@ func NewRedis(cfg RedisConfig) (*Redis, error) {
 	if cfg.URL == "" {
 		return nil, errors.New("redis url is required")
 	}
-	client, err := NewNetRedisClient(cfg.URL)
+	client, err := NewRueidisClient(cfg.URL)
 	if err != nil {
 		return nil, err
 	}
