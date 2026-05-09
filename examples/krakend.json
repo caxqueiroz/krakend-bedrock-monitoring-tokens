@@ -28,7 +28,14 @@
         {
           "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
           "url_pattern": "/model/{model}/invoke",
-          "method": "POST"
+          "method": "POST",
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "bedrock-usage-sigv4",
+              "region": "us-east-1",
+              "service": "bedrock-runtime"
+            }
+          }
         }
       ]
     },
@@ -39,7 +46,14 @@
         {
           "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
           "url_pattern": "/model/{model}/invoke-with-response-stream",
-          "method": "POST"
+          "method": "POST",
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "bedrock-usage-sigv4",
+              "region": "us-east-1",
+              "service": "bedrock-runtime"
+            }
+          }
         }
       ]
     },
@@ -50,7 +64,14 @@
         {
           "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
           "url_pattern": "/model/{model}/converse",
-          "method": "POST"
+          "method": "POST",
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "bedrock-usage-sigv4",
+              "region": "us-east-1",
+              "service": "bedrock-runtime"
+            }
+          }
         }
       ]
     },
@@ -61,7 +82,14 @@
         {
           "host": ["https://bedrock-runtime.us-east-1.amazonaws.com"],
           "url_pattern": "/model/{model}/converse-stream",
-          "method": "POST"
+          "method": "POST",
+          "extra_config": {
+            "plugin/http-client": {
+              "name": "bedrock-usage-sigv4",
+              "region": "us-east-1",
+              "service": "bedrock-runtime"
+            }
+          }
         }
       ]
     }
