@@ -4,7 +4,7 @@ vars:
   PLUGIN_NAME: bedrock-usage.so
   BUILD_DIR: ./bin
   KRAKEND_VERSION: "2.13.4"
-  KRAKEND_EE_VERSION: "2.13.2"
+  KRAKEND_EE_VERSION: "2.13.3"
   KRAKEND_EE_BUILDER_VARIANT: "-linux-generic"
   KRAKEND_CONFIG: ./examples/krakend.json
   KRAKEND_PORT: "8080"
@@ -152,7 +152,7 @@ tasks:
         run -c /etc/krakend/krakend.json
 
   docker:image:fedora-ee:
-    desc: Build a Fedora image bundling Go 1.25.9 and KrakenD EE 2.13.2 (glibc dev environment)
+    desc: Build a Fedora image bundling Go 1.25.10 and KrakenD EE 2.13.3 (glibc dev environment)
     cmds:
       - >
         docker build --platform=linux/amd64
